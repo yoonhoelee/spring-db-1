@@ -2,38 +2,26 @@ package jdbc.db.service;
 
 import jdbc.db.domain.Member;
 import jdbc.db.repository.MemberRepositoryV3;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 // 트렌잭션 매니저
 @Slf4j
-public class MemberServiceV3_2 {
-    private final TransactionTemplate txTemplate;
+public class MemberServiceV3_3 {
     private final MemberRepositoryV3 memberRepository;
 
-    public MemberServiceV3_2(PlatformTransactionManager transactionManager, MemberRepositoryV3 memberRepository) {
-        this.txTemplate = new TransactionTemplate();
+    public MemberServiceV3_3(MemberRepositoryV3 memberRepository) {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public void accountTransfer(String fromId, String toId, int money) throws SQLException {
-        txTemplate.executeWithoutResult((status)-> {
-            try {
-                bizLogic(fromId, toId, money);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        bizLogic(fromId, toId, money);
     }
-    private void bizLogic(String fromId, String toId, int
-            money) throws SQLException {
+    private void bizLogic(String fromId, String toId, int money) throws SQLException {
         Member fromMember = memberRepository.findById(fromId);
         Member toMember = memberRepository.findById(toId);
         memberRepository.update(fromId, fromMember.getMoney() - money);
